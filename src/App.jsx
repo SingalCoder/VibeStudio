@@ -271,7 +271,8 @@ export default function App() {
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(0,200,200,0.2); border-radius: 4px; }
         textarea:focus, input:focus { outline: none; }
-        .w-tc-editor textarea { caret-color: #00e5ff !important; }
+        .w-tc-editor { height: 100% !important; overflow: auto !important; }
+        .w-tc-editor textarea { caret-color: #00e5ff !important; overflow: hidden !important; }
         .tab-btn { cursor:pointer; border:none; background:transparent; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; padding:11px 22px; transition:all 0.2s; color:rgba(0,100,120,0.5); border-bottom: 2px solid transparent; letter-spacing:0.2px; }
         .tab-btn:hover { color: #00b4cc; }
         .tab-active { color: #007a8a !important; border-bottom: 2px solid #00b4cc !important; }
@@ -404,8 +405,8 @@ export default function App() {
                       fontSize: 12,
                       fontFamily: "'JetBrains Mono', monospace",
                       lineHeight: 1.7,
-                      overflowY: "auto",
                       background: "transparent",
+                      height: "100%",
                     }}
                   />
                 </div>
