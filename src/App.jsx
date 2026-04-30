@@ -381,8 +381,8 @@ export default function App() {
                     <button className="icon-btn" style={{ ...s.runBtn, borderColor: "rgba(0,180,204,0.4)", color: "#00a0b0" }} onClick={() => setPreviewKey((k) => k + 1)}>▶ Run</button>
                   </div>
                 </div>
-                <div ref={editorWrapRef} style={{ display: "flex", flex: 1, overflow: "auto", margin: 10, borderRadius: 8, background: "rgba(0,40,50,0.78)" }}>
-                  <div ref={lineNumsRef} style={s.lineNums}>
+                <div ref={editorWrapRef} style={{ display: "flex", flex: 1, overflow: "auto", margin: 10, borderRadius: 8, background: "rgba(0,40,50,0.78)", alignItems: "flex-start" }}>
+                  <div ref={lineNumsRef} style={{ ...s.lineNums, position: "sticky", left: 0 }}>
                     {code.split("\n").map((_, i) => (
                       <div key={i}>{i + 1}</div>
                     ))}
@@ -398,7 +398,7 @@ export default function App() {
                       fontFamily: "'JetBrains Mono', monospace",
                       lineHeight: 1.7,
                       background: "transparent",
-                      height: "100%",
+                      minWidth: 0,
                     }}
                   />
                 </div>
