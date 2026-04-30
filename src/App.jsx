@@ -63,6 +63,8 @@ Every game runs inside a sandboxed iframe (sandbox="allow-scripts") with zero ex
 - Always return the COMPLETE updated HTML file from <!DOCTYPE html> to </html>`;
 
 async function fetchAI(prompt, signal, retries = 3) {
+  let lastError = null;
+
   // Primary: Gemini
   if (GEMINI_KEYS.length > 0) {
     for (let i = 0; i < retries; i++) {
@@ -79,6 +81,7 @@ async function fetchAI(prompt, signal, retries = 3) {
       });
       if (res.status === 429 || res.status === 503) {
         geminiIndex++;
+        lastError = new Error("Rate limited — too many requests. Please wait a moment and try again.");
         await new Promise(r => setTimeout(r, 1000 * 2 ** i));
         continue;
       }
@@ -107,6 +110,7 @@ async function fetchAI(prompt, signal, retries = 3) {
       });
       if (res.status === 429) {
         groqIndex++;
+        lastError = new Error("Rate limited — too many requests. Please wait a moment and try again.");
         await new Promise(r => setTimeout(r, 1000 * 2 ** i));
         continue;
       }
@@ -116,6 +120,7 @@ async function fetchAI(prompt, signal, retries = 3) {
     }
   }
 
+  if (lastError) throw lastError;
   throw new Error("No API keys configured. Add VITE_GEMINI_KEY_1 or VITE_GROQ_KEY_1 to your .env file.");
 }
 
