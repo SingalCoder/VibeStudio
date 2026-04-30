@@ -2,7 +2,7 @@
 
 A prompt-to-game platform where you can generate, edit, and preview browser games live with full code visibility to learn as you build.
 
-**[Live Demo →](https://vibostudio.vercel.app)**
+**[Live Demo →](https://learn-vibe-studio.vercel.app)**
 
 ---
 
