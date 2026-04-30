@@ -178,14 +178,6 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    if (tab !== "code") return;
-    const scrollEl = editorWrapRef.current?.querySelector(".w-tc-editor") ?? editorWrapRef.current?.querySelector("textarea");
-    if (!scrollEl) return;
-    const sync = () => { if (lineNumsRef.current) lineNumsRef.current.scrollTop = scrollEl.scrollTop; };
-    scrollEl.addEventListener("scroll", sync);
-    return () => scrollEl.removeEventListener("scroll", sync);
-  }, [tab]);
 
   const handleCodeChange = useCallback((val) => {
     setCode(val);
@@ -271,7 +263,7 @@ export default function App() {
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(0,200,200,0.2); border-radius: 4px; }
         textarea:focus, input:focus { outline: none; }
-        .w-tc-editor { height: 100% !important; overflow: auto !important; }
+        .w-tc-editor { overflow: visible !important; }
         .w-tc-editor textarea { caret-color: #00e5ff !important; overflow: hidden !important; }
         .tab-btn { cursor:pointer; border:none; background:transparent; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; padding:11px 22px; transition:all 0.2s; color:rgba(0,100,120,0.5); border-bottom: 2px solid transparent; letter-spacing:0.2px; }
         .tab-btn:hover { color: #00b4cc; }
@@ -389,7 +381,7 @@ export default function App() {
                     <button className="icon-btn" style={{ ...s.runBtn, borderColor: "rgba(0,180,204,0.4)", color: "#00a0b0" }} onClick={() => setPreviewKey((k) => k + 1)}>▶ Run</button>
                   </div>
                 </div>
-                <div ref={editorWrapRef} style={{ display: "flex", flex: 1, overflow: "hidden", margin: 10, borderRadius: 8, background: "rgba(0,40,50,0.78)" }}>
+                <div ref={editorWrapRef} style={{ display: "flex", flex: 1, overflow: "auto", margin: 10, borderRadius: 8, background: "rgba(0,40,50,0.78)" }}>
                   <div ref={lineNumsRef} style={s.lineNums}>
                     {code.split("\n").map((_, i) => (
                       <div key={i}>{i + 1}</div>
