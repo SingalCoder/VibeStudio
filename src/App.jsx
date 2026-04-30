@@ -5,6 +5,9 @@ import Landing from "./Landing";
 const GEMINI_KEYS = [
   import.meta.env.VITE_GEMINI_KEY_1,
   import.meta.env.VITE_GEMINI_KEY_2,
+  import.meta.env.VITE_GEMINI_KEY_3,
+  import.meta.env.VITE_GEMINI_KEY_4,
+  import.meta.env.VITE_GEMINI_KEY_5,
 ].filter(Boolean);
 const GROQ_KEYS = [
   import.meta.env.VITE_GROQ_KEY_1,
