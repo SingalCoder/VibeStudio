@@ -179,6 +179,35 @@ export default function App() {
   }, []);
 
 
+  useEffect(() => {
+    if (tab !== "code") return;
+    const textarea = editorWrapRef.current?.querySelector("textarea");
+    if (!textarea) return;
+
+    const scrollToCursor = () => {
+      requestAnimationFrame(() => {
+        const container = editorWrapRef.current;
+        if (!container) return;
+        const lineHeight = 12 * 1.7;
+        const padding = 14;
+        const currentLine = textarea.value.substring(0, textarea.selectionStart).split("\n").length - 1;
+        const cursorY = currentLine * lineHeight + padding;
+        if (cursorY + lineHeight > container.scrollTop + container.clientHeight) {
+          container.scrollTop = cursorY + lineHeight - container.clientHeight + padding;
+        } else if (cursorY < container.scrollTop + padding) {
+          container.scrollTop = cursorY - padding;
+        }
+      });
+    };
+
+    textarea.addEventListener("keyup", scrollToCursor);
+    textarea.addEventListener("click", scrollToCursor);
+    return () => {
+      textarea.removeEventListener("keyup", scrollToCursor);
+      textarea.removeEventListener("click", scrollToCursor);
+    };
+  }, [tab]);
+
   const handleCodeChange = useCallback((val) => {
     setCode(val);
     clearTimeout(previewTimeout.current);
