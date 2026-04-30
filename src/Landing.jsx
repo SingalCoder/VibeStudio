@@ -519,7 +519,7 @@ export default function Landing({ onEnterStudio }) {
       <section style={s.hero}>
         <div className="reveal" style={s.heroBadge}>
           <span style={s.badgeDot} />
-          <span style={s.badgeText}>Powered by Gemini 2.5 Pro · Groq · Llama 3.3</span>
+          <span style={s.badgeText}>Powered by Gemini 2.0 Flash · Groq · Llama 3.3</span>
         </div>
 
         <div
