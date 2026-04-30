@@ -177,11 +177,11 @@ export default function App() {
 
   useEffect(() => {
     if (tab !== "code") return;
-    const textarea = editorWrapRef.current?.querySelector("textarea");
-    if (!textarea) return;
-    const sync = () => { if (lineNumsRef.current) lineNumsRef.current.scrollTop = textarea.scrollTop; };
-    textarea.addEventListener("scroll", sync);
-    return () => textarea.removeEventListener("scroll", sync);
+    const scrollEl = editorWrapRef.current?.querySelector(".w-tc-editor") ?? editorWrapRef.current?.querySelector("textarea");
+    if (!scrollEl) return;
+    const sync = () => { if (lineNumsRef.current) lineNumsRef.current.scrollTop = scrollEl.scrollTop; };
+    scrollEl.addEventListener("scroll", sync);
+    return () => scrollEl.removeEventListener("scroll", sync);
   }, [tab]);
 
   const handleCodeChange = useCallback((val) => {
