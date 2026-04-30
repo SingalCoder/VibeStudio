@@ -17,7 +17,7 @@ let groqIndex = 0;
 const getGeminiKey = () => GEMINI_KEYS[geminiIndex % GEMINI_KEYS.length];
 const getGroqKey   = () => GROQ_KEYS[groqIndex % GROQ_KEYS.length];
 
-const GEMINI_MODEL = "gemini-2.5-pro";
+const GEMINI_MODEL = "gemini-2.0-flash";
 const GROQ_MODEL   = "llama-3.3-70b-versatile";
 
 const SYSTEM_PROMPT = `\
