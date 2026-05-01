@@ -2,26 +2,6 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import Landing from "./Landing";
 
-const GEMINI_KEYS = [
-  import.meta.env.VITE_GEMINI_KEY_1,
-  import.meta.env.VITE_GEMINI_KEY_2,
-  import.meta.env.VITE_GEMINI_KEY_3,
-  import.meta.env.VITE_GEMINI_KEY_4,
-  import.meta.env.VITE_GEMINI_KEY_5,
-].filter(Boolean);
-const GROQ_KEYS = [
-  import.meta.env.VITE_GROQ_KEY_1,
-  import.meta.env.VITE_GROQ_KEY_2,
-  import.meta.env.VITE_GROQ_KEY_3,
-].filter(Boolean);
-
-let geminiIndex = 0;
-let groqIndex = 0;
-const getGeminiKey = () => GEMINI_KEYS[geminiIndex % GEMINI_KEYS.length];
-const getGroqKey   = () => GROQ_KEYS[groqIndex % GROQ_KEYS.length];
-
-const GEMINI_MODEL = "gemini-2.0-flash";
-const GROQ_MODEL   = "llama-3.3-70b-versatile";
 
 const SYSTEM_PROMPT = `\
 You are an expert browser game developer for VibeStudio — an AI-powered game generator that instantly creates fully playable HTML5 games from plain-English descriptions.
@@ -65,66 +45,16 @@ Every game runs inside a sandboxed iframe (sandbox="allow-scripts") with zero ex
 - Preserve all existing game logic, scoring, visual style, and control scheme unless explicitly told to change them
 - Always return the COMPLETE updated HTML file from <!DOCTYPE html> to </html>`;
 
-async function fetchAI(prompt, signal, retries = 3) {
-  let lastError = null;
-
-  // Primary: Gemini
-  if (GEMINI_KEYS.length > 0) {
-    for (let i = 0; i < retries; i++) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${getGeminiKey()}`;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 8192, temperature: 0.4 },
-        }),
-        signal,
-      });
-      if (res.status === 429 || res.status === 503) {
-        geminiIndex++;
-        lastError = new Error("Rate limited — too many requests. Please wait a moment and try again.");
-        await new Promise(r => setTimeout(r, 1000 * 2 ** i));
-        continue;
-      }
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error?.message || res.statusText);
-      return data.candidates[0].content.parts[0].text;
-    }
-  }
-
-  // Fallback: Groq
-  if (GROQ_KEYS.length > 0) {
-    for (let i = 0; i < retries; i++) {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${getGroqKey()}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
-          max_tokens: 4000,
-          temperature: 0.4,
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            { role: "user",   content: prompt },
-          ],
-        }),
-        signal,
-      });
-      if (res.status === 429) {
-        groqIndex++;
-        lastError = new Error("Rate limited — too many requests. Please wait a moment and try again.");
-        await new Promise(r => setTimeout(r, 1000 * 2 ** i));
-        continue;
-      }
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error?.message || res.statusText);
-      return data.choices[0].message.content;
-    }
-  }
-
-  if (lastError) throw lastError;
-  throw new Error("No API keys configured. Add VITE_GEMINI_KEY_1 or VITE_GROQ_KEY_1 to your .env file.");
+async function fetchAI(prompt, signal) {
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, systemPrompt: SYSTEM_PROMPT }),
+    signal,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error || res.statusText);
+  return data.text;
 }
 
 function extractHTML(text) {
