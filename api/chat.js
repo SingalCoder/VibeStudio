@@ -12,8 +12,7 @@ const GROQ_KEYS = [
   process.env.GROQ_KEY_3,
 ].filter(Boolean);
 
-let geminiIndex = 0;
-let groqIndex = 0;
+const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
@@ -24,9 +23,9 @@ export default async function handler(req, res) {
   let lastError = null;
 
   if (GEMINI_KEYS.length > 0) {
-    for (let i = 0; i < retries; i++) {
-      const key = GEMINI_KEYS[geminiIndex % GEMINI_KEYS.length];
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+    const shuffled = [...GEMINI_KEYS].sort(() => Math.random() - 0.5);
+    for (let i = 0; i < shuffled.length; i++) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${shuffled[i]}`;
       const r = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -37,9 +36,7 @@ export default async function handler(req, res) {
         }),
       });
       if (r.status === 429 || r.status === 503) {
-        geminiIndex++;
         lastError = "Rate limited";
-        await new Promise(resolve => setTimeout(resolve, 1000 * 2 ** i));
         continue;
       }
       const data = await r.json();
@@ -49,11 +46,11 @@ export default async function handler(req, res) {
   }
 
   if (GROQ_KEYS.length > 0) {
-    for (let i = 0; i < retries; i++) {
-      const key = GROQ_KEYS[groqIndex % GROQ_KEYS.length];
+    const shuffled = [...GROQ_KEYS].sort(() => Math.random() - 0.5);
+    for (let i = 0; i < shuffled.length; i++) {
       const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        headers: { Authorization: `Bearer ${shuffled[i]}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "llama-3.3-70b-versatile",
           max_tokens: 4000,
@@ -65,9 +62,7 @@ export default async function handler(req, res) {
         }),
       });
       if (r.status === 429) {
-        groqIndex++;
         lastError = "Rate limited";
-        await new Promise(resolve => setTimeout(resolve, 1000 * 2 ** i));
         continue;
       }
       const data = await r.json();
