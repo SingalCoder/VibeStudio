@@ -25,49 +25,59 @@ export default async function handler(req, res) {
   if (GEMINI_KEYS.length > 0) {
     const shuffled = [...GEMINI_KEYS].sort(() => Math.random() - 0.5);
     for (let i = 0; i < shuffled.length; i++) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${shuffled[i]}`;
-      const r = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 8192, temperature: 0.4 },
-        }),
-      });
-      if (r.status === 429 || r.status === 503) {
-        lastError = "Rate limited";
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${shuffled[i]}`;
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { maxOutputTokens: 8192, temperature: 0.4 },
+          }),
+        });
+        if (r.status === 429 || r.status === 503) {
+          lastError = "Rate limited";
+          continue;
+        }
+        const data = await r.json();
+        if (!r.ok) return res.status(r.status).json({ error: data?.error?.message });
+        return res.json({ text: data.candidates[0].content.parts[0].text });
+      } catch (e) {
+        lastError = e.message;
         continue;
       }
-      const data = await r.json();
-      if (!r.ok) return res.status(r.status).json({ error: data?.error?.message });
-      return res.json({ text: data.candidates[0].content.parts[0].text });
     }
   }
 
   if (GROQ_KEYS.length > 0) {
     const shuffled = [...GROQ_KEYS].sort(() => Math.random() - 0.5);
     for (let i = 0; i < shuffled.length; i++) {
-      const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${shuffled[i]}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          max_tokens: 4000,
-          temperature: 0.4,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: prompt },
-          ],
-        }),
-      });
-      if (r.status === 429) {
-        lastError = "Rate limited";
+      try {
+        const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${shuffled[i]}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            max_tokens: 4000,
+            temperature: 0.4,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: prompt },
+            ],
+          }),
+        });
+        if (r.status === 429) {
+          lastError = "Rate limited";
+          continue;
+        }
+        const data = await r.json();
+        if (!r.ok) return res.status(r.status).json({ error: data?.error?.message });
+        return res.json({ text: data.choices[0].message.content });
+      } catch (e) {
+        lastError = e.message;
         continue;
       }
-      const data = await r.json();
-      if (!r.ok) return res.status(r.status).json({ error: data?.error?.message });
-      return res.json({ text: data.choices[0].message.content });
     }
   }
 
